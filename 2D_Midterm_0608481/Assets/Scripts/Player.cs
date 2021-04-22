@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI; // 引用 介面 API
 
 public class Player : MonoBehaviour
 {
@@ -17,6 +18,21 @@ public class Player : MonoBehaviour
     public Transform tra;
     [Header("動畫元件")]
     public Animator ani;
+    [Header("偵測範圍")]
+    public float rangeAttack = 2.5f;
+    [Header("音效來源")]
+    public AudioSource aud;
+    [Header("攻擊音效")]
+    public AudioClip soundAttack;
+
+    // 事件 : 繪製圖示
+    private void OnDrawGizmos()
+    {
+        // 指定圖示顏色 (紅, 綠, 藍, 透明)
+        Gizmos.color = new Color(1, 0, 0, 0.4f);
+        // 繪製圖示 球體(中心點, 半徑)
+        Gizmos.DrawSphere(transform.position, rangeAttack);
+    }
 
     private void Move()
     {
@@ -27,9 +43,15 @@ public class Player : MonoBehaviour
         //if (Input.) ani.SetBool("等待", false);
     }
 
-    private void Attack()
+    public void Attack()
     {
-
+        // 音效來源.播放一次(音效片段,音量)
+        aud.PlayOneShot(soundAttack, 1.2f);
+        
+        // 2D 物理 圓形碰撞(中心點, 半徑, 方向)
+        RaycastHit2D hit = Physics2D.CircleCast(transform.position, rangeAttack, -transform.up, 0, 1 << 8);
+        // 如果 碰到的物件 標籤 為 道具 就取得道具腳本並呼叫掉落道具方法
+        if (hit && hit.collider.tag == "道具") hit.collider.GetComponent<Item>().DropProp();
     }
 
     private void Hit()
@@ -49,6 +71,25 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        
+        Move();
+    }
+
+    [Header("吃金條音效")]
+    public AudioClip soundEat;
+    [Header("金幣數量")]
+    public Text textCoin;
+
+    private int coin;
+    
+    // 觸發事件 - 進入 : 兩個物件必須有一個勾選 Is Trigger
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.tag == "寶石")
+        {
+            coin++;
+            aud.PlayOneShot(soundEat);
+            Destroy(collision.gameObject);
+            textCoin.text = "金幣 : " + coin;
+        }
     }
 }
