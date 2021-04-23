@@ -25,6 +25,11 @@ public class Player : MonoBehaviour
     [Header("攻擊音效")]
     public AudioClip soundAttack;
 
+    Vector3 currentEulerAngles;
+    float x;
+    float y;
+    float z;
+
     // 事件 : 繪製圖示
     private void OnDrawGizmos()
     {
@@ -37,10 +42,17 @@ public class Player : MonoBehaviour
     private void Move()
     {
         float h = joystick.Horizontal;
+        tra.Translate(h * speed * Time.deltaTime, 0, 0);
         ani.SetBool("等待", h != 0);
-
-        //if (Input.) ani.SetBool("等待", true);
-        //if (Input.) ani.SetBool("等待", false);
+        
+        if(h >= 0)
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+        else
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
     }
 
     public void Attack()
